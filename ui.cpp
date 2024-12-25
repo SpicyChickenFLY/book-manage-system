@@ -110,24 +110,24 @@ class UserDb {
     }
 
     void listUsers() {
-        cout << "|             account |    role |" << endl;
+        cout << "|                账户 |    角色 |" << endl;
         cout << "|  ================== | ======= |" << endl;
         for (User& user : users) {
             cout << "|" << setw(20) << user.getAccount() << " |" << setw(8) << user.getRole() << " |" << endl;
         }
-        cout << "total" << users.size() << "reord" << endl;
+        cout << "共 " << users.size() << " 条记录" << endl;
     }
 
     void findUser(const string& account) {
         for (User& user : users) {
             if (user.getAccount() == account) {
-                cout << "|             account |    role |" << endl;
+                cout << "|                账户 |    角色 |" << endl;
                 cout << "|  ================== | ======= |" << endl;
                 cout << "|" << setw(20) << user.getAccount() << " |" << setw(8) << user.getRole() << " |" << endl;
                 return;
             }
         }
-        cout << "find failed, user(" << account << ") not ex" << endl;
+        cout << "查询用户失败, 用户(" << account << ")不存在" << endl;
     }
 
     User* checkUser(const string& account) {
@@ -165,7 +165,7 @@ class UserDb {
     // 删除记录
     void deleteUser(const string& account) {
         if (checkUser(account) == nullptr) {
-            cout << "删除用户失败, 用户(" << account << ") 不存在" << endl;
+            cout << "删除用户失败, 用户(" << account << ")不存在" << endl;
             return;
         }
         users.erase(remove_if(users.begin(), users.end(), [account](const User& user) {
@@ -181,7 +181,7 @@ class UserDb {
     // 更新记录
     void updateUser(const string& account, const string& password, const string& role) {
         if (role != "admin" && role != "user") {
-            cout << "create failed, role must be admin or user" << endl;
+            cout << "更新用户失败, 角色必须是admin或user" << endl;
             return;
         }
         for (User& user : users) {
@@ -189,14 +189,14 @@ class UserDb {
                 user.setPassword(password);
                 user.setRole(role);
                 if (save()) {
-                    cout << "update succes" << endl;
+                    cout << "更新用户成功" << endl;
                 } else {
-                    cout << "update failed" << endl;
+                    cout << "更新用户失败" << endl;
                 }
                 return;
             }
         }
-        cerr << "user" << account << " 未找到: " << endl;
+        cerr << "更新失败, 用户(" << account << ")不存在: " << endl;
     }
 };
 
@@ -251,12 +251,12 @@ class BookDb {
     }
 
     void listBooks() {
-        cout << "|             name |    author |" << endl;
+        cout << "|            书籍名称 |   作者 |" << endl;
         cout << "|  ================== | ======= |" << endl;
         for (Book& book : books) {
             cout << "|" << setw(20) << book.getName() << " |" << setw(8) << book.getAuthor() << " |" << endl;
         }
-        cout << "total" << books.size() << "reord" << endl;
+        cout << "共 " << books.size() << " 条记录" << endl;
     }
 
     void findBook(const string& name) {
@@ -268,7 +268,7 @@ class BookDb {
                 return;
             }
         }
-        cout << "find failed, book(" << name << ") not ex" << endl;
+        cout << "查询书籍失败, 数据名称(" << name << ")不存在" << endl;
     }
 
     Book* checkBook(const string& name) {
@@ -427,7 +427,7 @@ class Menu {
 
 /*
  *  ============================================
- *                  system
+ *                  系统运行逻辑
  *  ============================================
  */
 
@@ -444,8 +444,8 @@ class BookSys {
         bookDb = bd;
 
         menu = new Menu("主菜单");
-        menu->addItem("关于", []() { cout << "这是一个用 C++ 实现的交互式菜单系统。" << endl; });
-        menu->addItem("login", [this]() {this->login();});
+        menu->addItem("关于", []() { cout << "这是一个用 C++ 实现的图书管理系统。" << endl; });
+        menu->addItem("登录", [this]() {this->login();});
     }
 
     void login() {
@@ -473,7 +473,7 @@ class BookSys {
 
         cout << "登录成功，您的角色为：" << user->getRole() << endl;
         currentUser = user;
-        menu->removeItem("login");
+        menu->removeItem("登录");
         if (user->getRole() == "admin") {
             loginAsAdmin();
         } else {
@@ -482,11 +482,11 @@ class BookSys {
     }
 
     void loginAsAdmin() {
-        Menu *userMenu = new Menu("user mgr", menu);
-        userMenu->addItem("list user", [this]() {
+        Menu *userMenu = new Menu("账户管理", menu);
+        userMenu->addItem("列出所有账户", [this]() {
             this->userDb->listUsers();
         });
-        userMenu->addItem("find user", [this]() {
+        userMenu->addItem("查询账户", [this]() {
             string account;
             cout << "请输入账户名称: ";
             cin.ignore();
@@ -495,7 +495,7 @@ class BookSys {
 
             this->userDb->findUser(account);
         });
-        userMenu->addItem("add user", [this]() {
+        userMenu->addItem("新增账户", [this]() {
             string account;
             cout << "请输入账户名称: ";
             cin.ignore();
@@ -512,7 +512,7 @@ class BookSys {
 
             this->userDb->addUser(account, password, role);
         });
-        userMenu->addItem("delete user", [this]() {
+        userMenu->addItem("删除账户", [this]() {
             string account;
             cout << "请输入账户名称: ";
             cin.ignore();
@@ -521,7 +521,7 @@ class BookSys {
 
             this->userDb->deleteUser(account);
         });
-        userMenu->addItem("update user", [this]() {
+        userMenu->addItem("更新账户", [this]() {
             string account;
             cout << "请输入账户名称: ";
             cin.ignore();
@@ -538,13 +538,13 @@ class BookSys {
 
             this->userDb->updateUser(account, password, role);
         });
-        menu->addItem("user mgr", [this, userMenu]() {this->menu=userMenu; });
+        menu->addItem("账户管理", [this, userMenu]() {this->menu=userMenu; });
 
-        Menu *bookMenu = new Menu("book mgr", menu);
-        bookMenu->addItem("list book", [this]() {
+        Menu *bookMenu = new Menu("书籍管理", menu);
+        bookMenu->addItem("列出所有书籍", [this]() {
             this->bookDb->listBooks();
         });
-        bookMenu->addItem("find book", [this]() {
+        bookMenu->addItem("查询书籍", [this]() {
             string name;
             cout << "请输入账户名称: ";
             cin.ignore();
@@ -553,50 +553,50 @@ class BookSys {
 
             this->bookDb->findBook(name);
         });
-        bookMenu->addItem("add book", [this]() {
+        bookMenu->addItem("新增书籍", [this]() {
             string name;
-            cout << "请输book名称: ";
+            cout << "请输入书籍名称: ";
             cin.ignore();
             getline(cin, name);
 
             string isbn;
-            cout << "请输入book" << name << "的isbn: ";
+            cout << "请输入书籍(" << name << ")的ISBN号: ";
             getline(cin, isbn);
 
             string author;
-            cout << "请输入book" << name << "的author: ";
+            cout << "请输入书籍(" << name << ")的作者名: ";
             getline(cin, author);
             clearScreen();
 
             this->bookDb->addBook(name, isbn, author);
         });
-        bookMenu->addItem("delete book", [this]() {
+        bookMenu->addItem("删除书籍", [this]() {
             string name;
-            cout << "请输入book: ";
+            cout << "请输入书籍名称: ";
             cin.ignore();
             getline(cin, name);
             clearScreen();
 
             this->bookDb->deleteBook(name);
         });
-        bookMenu->addItem("update book", [this]() {
+        bookMenu->addItem("更新书籍", [this]() {
             string name;
-            cout << "请输入book名称: ";
+            cout << "请输入书籍名称: ";
             cin.ignore();
             getline(cin, name);
 
             string isbn;
-            cout << "请输book" << name << "的ISBN: ";
+            cout << "请输入书籍(" << name << ")的ISBN号: ";
             getline(cin, isbn);
 
             string author;
-            cout << "请输入book" << name << "的author: ";
+            cout << "请输入书籍(" << name << ")的作者名: ";
             getline(cin, author);
             clearScreen();
 
             this->bookDb->updateBook(name, isbn, author);
         });
-        menu->addItem("book mgr", [this, bookMenu]() {this->menu=bookMenu; });
+        menu->addItem("书籍管理", [this, bookMenu]() {this->menu=bookMenu; });
     }
 
     void loginAsUser() {
@@ -627,13 +627,13 @@ class BookSys {
 int main() {
     UserDb *userDb = new UserDb("./user.csv");
     if (!userDb->load()) {
-        cout << "init user db failed, file not found" << endl;
+        cout << "初始化账户数据库失败，账户文件不存在" << endl;
         return 1;
     }
 
     BookDb *bookDb = new BookDb("./book.csv");
     if (!bookDb->load()) {
-        cout << "init book db failed, file not found" << endl;
+        cout << "初始化书籍数据库失败，书籍文件不存在" << endl;
         return 1;
     }
 
