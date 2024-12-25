@@ -158,7 +158,7 @@ class UserDb {
         if (save()) {
             cout << "创建用户成功" << endl;
         } else {
-            cout << "创建用户失败" << endl;
+            cout << "创建用户失败, 文件写入异常" << endl;
         }
     }
 
@@ -174,7 +174,7 @@ class UserDb {
         if (save()) {
             cout << "删除用户成功" << endl;
         } else {
-            cout << "删除用户失败" << endl;
+            cout << "删除用户失败, 文件写入异常" << endl;
         }
     }
 
@@ -191,7 +191,7 @@ class UserDb {
                 if (save()) {
                     cout << "更新用户成功" << endl;
                 } else {
-                    cout << "更新用户失败" << endl;
+                    cout << "更新用户失败, 文件写入异常" << endl;
                 }
                 return;
             }
@@ -283,7 +283,7 @@ class BookDb {
     // 添加记录
     void addBook(const string& name, const string& isbn, const string& author) {
         if (checkBook(name) != nullptr) {
-            cout << "create failed, book(" << name << ") alreday ex" << endl;
+            cout << "新增书籍失败, 书籍(" << name << ")已经存在" << endl;
             return;
         }
         Book book;
@@ -293,9 +293,9 @@ class BookDb {
 
         books.push_back(book);
         if (save()) {
-            cout << "create succes" << endl;
+            cout << "新增书籍成功" << endl;
         } else {
-            cout << "create failed" << endl;
+            cout << "新增书籍失败, 文件写入异常" << endl;
         }
     }
 
@@ -311,7 +311,7 @@ class BookDb {
         if (save()) {
             cout << "delete succes" << endl;
         } else {
-            cout << "delete failed" << endl;
+            cout << "delete failed, 文件写入异常" << endl;
         }
     }
 
@@ -328,7 +328,7 @@ class BookDb {
                 if (save()) {
                     cout << "update succes" << endl;
                 } else {
-                    cout << "update failed" << endl;
+                    cout << "update failed, 文件写入异常" << endl;
                 }
                 return;
             }
