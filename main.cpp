@@ -48,6 +48,7 @@ class User {
     void setRole(const string& rl) { role = rl; }
 };
 
+// 书籍类
 class Book {
     private:
     string name; // 书籍名称
@@ -76,6 +77,7 @@ class Book {
     void setBorrow(int b) { borrow = b; }
 };
 
+// 用户书籍借阅关系类
 class UserBookMap {
     private:
     string account; // 借阅账户名称
@@ -89,35 +91,38 @@ class UserBookMap {
     void setISBN(const string& i) { isbn = i; }
 };
 
- 
+// 用户数据库
 class UserDb {
     private:
-    string filename;
-    vector<User> users;
+    string filename; // 文件数据库的文件名
+    vector<User> users; // 文件读入内存后的用户数组
     public:
-    UserDb(const string &fn): filename(fn) {}
+    UserDb(const string &fn): filename(fn) {} // 构造仅对私有成员赋值
 
+    // 数据库从文件加载用户数据
     bool load() {
+        // 使用文件输入流打开文件并准备读取
         ifstream file(filename);
         if (!file.is_open()) {
             cerr << "无法打开文件: " << filename << endl;
             return false;
         }
 
+        // 按行读取文件
         string line;
         while (getline(file, line)) {
             User user;
-            stringstream ss(line);
+            stringstream ss(line); // 通过字符串流解析文件行内容
             string field;
 
-            getline(ss, field, ',');
-            user.setAccount(field);
+            getline(ss, field, ','); // 获取行文本内容直到出现逗号（CSV文件以逗号进行分割）
+            user.setAccount(field); // 将读取内容赋值到对象的对应成员中
             getline(ss, field, ',');
             user.setPassword(field);
             getline(ss, field, ',');
             user.setRole(field);
 
-            users.push_back(user);
+            users.push_back(user); // 用户数组添加新用户
         }
 
         file.close();
@@ -126,12 +131,14 @@ class UserDb {
 
     // 保存记录到文件
     bool save() {
+        // 使用文件输出流打开文件并准备写入
         ofstream file(filename);
         if (!file.is_open()) {
             cerr << "无法打开文件: " << filename << endl;
             return false;
         }
 
+        // 遍历每个用户并输出用户的各个成员
         for (const User& user : users) {
             file << user.getAccount() << "," << user.getPassword() << "," << user.getRole() << "\n";
         }
@@ -231,6 +238,7 @@ class UserDb {
     }
 };
 
+// 书籍数据库
 class BookDb {
     private:
     string filename;
@@ -282,6 +290,7 @@ class BookDb {
         }
 
         for (const Book& book : books) {
+            // TODO:
             file << book.getName() << "," << book.getISBN() << "," << book.getAuthor() << "\n";
         }
 
@@ -339,6 +348,7 @@ class BookDb {
             printBody(book);
             count++;
         }
+        // TODO: 结果需要排序
         printTotal(count);
     }
 
@@ -464,6 +474,7 @@ class BookDb {
     }
 };
 
+// 用户书籍借阅关系数据库
 class UserBookMapDb {
     private:
     string filename;
@@ -651,33 +662,33 @@ class Menu {
  */
 
 
+// 图书管理系统类
 class BookSys {
     private:
-    Menu* menu;
-    UserDb* userDb;
-    BookDb* bookDb;
-    UserBookMapDb *userBookMapDb;
-    User* currentUser;
+    Menu* menu; // 指示当前所处的菜单
+    User* currentUser; // 指示当前登录的用户
+    UserDb* userDb; // 用户数据库
+    BookDb* bookDb; // 书籍数据库
+    UserBookMapDb *userBookMapDb; // 借阅数据库
 
     public:
-    BookSys(UserDb *ud, BookDb *bd, UserBookMapDb *ubmd) {
-        userDb = ud;
-        bookDb = bd;
-        userBookMapDb = ubmd;
-
-        currentUser = new User();
-        currentUser->setAccount("guest");
-
+    BookSys(UserDb *ud, BookDb *bd, UserBookMapDb *ubmd, User* cu)
+        : userDb(ud), bookDb(bd), userBookMapDb(ubmd), currentUser(cu) {
         addMainMenu();
     }
 
+    // 显示需要输入的内容，并获取用户输入
     string input(string desc) {
-        string temp;
+        // 显示需要输入的内容
         cout << "请输入" << desc << ": ";
+
+        // 并获取用户输入
+        string temp;
         getline(cin, temp);
         return temp;
     }
 
+    // 处理用户登录逻辑
     void login() {
         cin.ignore();
         string account = input("账户名称");
@@ -708,11 +719,13 @@ class BookSys {
         }
     }
 
+    // 动态增加主菜单
     void addMainMenu() {
         menu = new Menu("主菜单");
         menu->addItem("登录", [this]() { this->login(); });
     }
 
+    // 动态增加账户管理菜单
     void addUserMgrMenu() {
         Menu *userMenu = new Menu("账户管理", menu);
         userMenu->addItem("列出所有账户", [this]() {
@@ -753,6 +766,7 @@ class BookSys {
 
     }
 
+    // 动态增加书籍管理菜单
     void addBookMgrMenu() {
         Menu *bookMgrMenu = new Menu("书籍管理", menu);
         bookMgrMenu->addItem("列出所有书籍", [this]() {
@@ -792,6 +806,7 @@ class BookSys {
         });
     }
 
+    // 动态增加数据搜索菜单
     void addBookSearchMenu() {
         Menu *bookSearchMenu = new Menu("书籍查找", menu);
         bookSearchMenu->addItem("书名查找", [this]() {
@@ -821,6 +836,7 @@ class BookSys {
         });
     }
 
+    // 动态增加借阅管理菜单
     void addUserBookMapMgrMenu() {
         Menu *borrowMenu = new Menu("书籍借阅管理", menu);
         borrowMenu->addItem("本人书籍借阅情况", [this]() {
@@ -846,6 +862,7 @@ class BookSys {
         });
     }
 
+    // 系统的循环运行逻辑
     void run() {
         clearScreen();
         cout << "欢迎使用图书管理系统，请先登录" << endl;
@@ -864,25 +881,29 @@ class BookSys {
 };
 
 
+// 主函数，程序入口
 int main() {
+    // 初始化 账户、书籍、借阅关系数据库
     UserDb *userDb = new UserDb("./user.csv");
+    BookDb *bookDb = new BookDb("./book.csv");
+    UserBookMapDb *userBookMapDb = new UserBookMapDb("./book_user_map.csv");
     if (!userDb->load()) {
         cout << "初始化账户数据库失败，账户文件不存在" << endl;
         return 1;
     }
-    BookDb *bookDb = new BookDb("./book.csv");
     if (!bookDb->load()) {
         cout << "初始化书籍数据库失败，书籍文件不存在" << endl;
         return 1;
     }
-    UserBookMapDb *userBookMapDb = new UserBookMapDb("./book_user_map.csv");
     if (!userBookMapDb->load()) {
         cout << "初始化借阅信息数据库失败，借阅信息文件不存在" << endl;
         return 1;
     }
 
+    User *currentUser = new User();
+    currentUser->setAccount("guest");
 
-    BookSys *bookSys = new BookSys(userDb, bookDb, userBookMapDb);
+    BookSys *bookSys = new BookSys(userDb, bookDb, userBookMapDb, currentUser);
     bookSys->run();
 
     return 0;
