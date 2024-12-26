@@ -290,37 +290,34 @@ class BookDb {
         }
 
         for (const Book& book : books) {
-            // TODO:
-            file << book.getName() << "," << book.getISBN() << "," << book.getAuthor() << "\n";
+            file << book.getName() << ","  << book.getISBN() << "," << book.getAuthor() << "," << book.getPublish() << "," << book.getPrice() << "," << book.getCapacity() << "," << book.getBorrow() << "\n";
         }
 
         file.close();
         return true;
     }
 
-    void printHeader() {
-        cout << "|            书籍名称 |                ISBN |      作者 |              出版社 |      价格 |    库存 | 借阅次数 |" << endl;
-        cout << "|  ================== | =================== | ========= | =================== | ========= | ======= | ======== |" << endl;
-    }
     void printBody(Book& book) {
-        cout << "|" << setw(20) << book.getName() << " |" << setw(20) << book.getISBN();
-        cout << " |" << setw(10) << book.getAuthor() << " |" << setw(20) << book.getPublish();
-        cout << " |" << setw(10) << book.getPrice() << " |" << setw(8) << book.getCapacity();
-        cout << " |" << setw(9) << book.getBorrow() << " |" << endl;
+        cout << "| 书籍名称:" << setw(15) << book.getName()
+             << "| ISBN:"     << setw(15) << book.getISBN()
+             << "| 作者:"     << setw(10) << book.getAuthor()
+             << "| 出版社:"   << setw(15) << book.getPublish()
+             << "| 价格:"     << setw(10) << book.getPrice()
+             << "| 库存:"     << setw(8) << book.getCapacity()
+             << "| 借阅次数:" << setw(8) << book.getBorrow()
+             << endl;
     }
     void printTotal(int total) {
         cout << "共 " << total << " 条记录" << endl;
     }
 
     void listBooks() {
-        printHeader();
         for (Book& book : books) { printBody(book); }
         printTotal(int(books.size()));
     }
 
     void listBooksForName(const string& name) {
         int count = 0;
-        printHeader();
         for (Book& book : books) {
             if (book.getName() != name) { continue; }
             printBody(book);
@@ -332,7 +329,6 @@ class BookDb {
     void findBookForISBN(const string& isbn) {
         for (Book& book : books) {
             if (book.getISBN() == isbn) {
-                printHeader();
                 printBody(book);
                 return;
             }
@@ -342,23 +338,24 @@ class BookDb {
 
     void listBookForAuthor(const string& author) {
         int count = 0;
-        printHeader();
-        for (Book& book : books) {
+        vector<Book> copy(books);
+        sort(copy.begin(), copy.end(), [](Book a, Book b) {
+            return a.getName().compare(b.getName()) < 0;
+        });
+        for (Book& book : copy) {
             if (book.getAuthor() != author) { continue; }
             printBody(book);
             count++;
         }
-        // TODO: 结果需要排序
         printTotal(count);
     }
 
     void listBooksByBorrow(int limit) {
         vector<Book> copy(books);
         sort(copy.begin(), copy.end(), [](Book a, Book b) {
-            return a.getBorrow() < b.getBorrow();
+            return a.getBorrow() > b.getBorrow();
         });
         int count = 0;
-        printHeader();
         for (size_t i = 0; i < min(int(copy.size()), limit) ; ++i) {
             printBody(copy[i]);
             count++;
