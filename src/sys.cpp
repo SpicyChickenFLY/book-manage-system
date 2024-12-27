@@ -83,8 +83,7 @@ void BookSys::login() {
 
 // 动态增加主菜单
 Menu *BookSys::createLoginMenu() {
-  Menu *loginMenu = new Menu("账户管理", nullptr);
-  loginMenu = new Menu("登录菜单");
+  Menu *loginMenu = new Menu("登录菜单", nullptr, "");
   loginMenu->addItem("管理员登录", ADMIN_LOGIN);
   loginMenu->addItem("读者登录", READER_LOGIN);
   return loginMenu;
@@ -96,7 +95,7 @@ Menu *BookSys::createMainMenuForAdmin() { return nullptr; }
 
 // 动态增加账户管理菜单
 Menu *BookSys::createUserMgrMenu(Menu *parentMenu) {
-  Menu *userMenu = new Menu("账户管理", parentMenu);
+  Menu *userMenu = new Menu("账户管理", parentMenu, "");
   userMenu->addItem("列出所有账户", LIST_USER);
   userMenu->addItem("查询账户", FIND_USER);
   userMenu->addItem("新增账户", ADD_USER);
@@ -107,7 +106,7 @@ Menu *BookSys::createUserMgrMenu(Menu *parentMenu) {
 
 // 动态增加书籍管理菜单
 Menu *BookSys::createBookMgrMenu(Menu *parentMenu) {
-  Menu *bookMgrMenu = new Menu("书籍管理", parentMenu);
+  Menu *bookMgrMenu = new Menu("书籍管理", parentMenu, "");
   bookMgrMenu->addItem("列出所有书籍", LIST_BOOK);
   bookMgrMenu->addItem("新增书籍", ADD_BOOK);
   bookMgrMenu->addItem("删除书籍", DEL_BOOK);
@@ -117,7 +116,7 @@ Menu *BookSys::createBookMgrMenu(Menu *parentMenu) {
 
 // 动态增加数据搜索菜单
 Menu *BookSys::createBookSearchMenu(Menu *parentMenu) {
-  Menu *bookSearchMenu = new Menu("书籍查找", parentMenu);
+  Menu *bookSearchMenu = new Menu("书籍查找", parentMenu, "");
   bookSearchMenu->addItem("书名查找", FIND_BOOK_NAME);
   bookSearchMenu->addItem("ISBN/ISSN编号查找", FIND_BOOK_ISBN);
   bookSearchMenu->addItem("作者查找", FIND_BOOK_AUTHOR);
@@ -127,7 +126,7 @@ Menu *BookSys::createBookSearchMenu(Menu *parentMenu) {
 
 // 动态增加借阅管理菜单
 Menu *BookSys::createUserBookMapMgrMenu(Menu *parentMenu) {
-  Menu *borrowMenu = new Menu("书籍借阅管理", parentMenu);
+  Menu *borrowMenu = new Menu("书籍借阅管理", parentMenu, "");
   borrowMenu->addItem("本人书籍借阅情况", LIST_USER_BOOK);
   borrowMenu->addItem("书籍借阅", ADD_USER_BOOK);
   borrowMenu->addItem("书籍归还", DEL_USER_BOOK);
