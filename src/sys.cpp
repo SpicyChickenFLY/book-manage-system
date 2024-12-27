@@ -44,8 +44,14 @@ BookSys::BookSys(UserService *us, BookService *bs, UserBookMapService *ubms)
 }
 
 bool BookSys::init() {
-  return (userService->load() && bookService->load() &&
-          userBookMapService->load());
+  // 初始化数据服务
+  if (!userService->load()) return false;
+  if (!bookService->load()) return false;
+  if (!userBookMapService->load()) return false;
+
+  // 初始化系统菜单
+
+  return true;
 }
 
 // 处理用户登录逻辑
@@ -66,12 +72,12 @@ void BookSys::login() {
   // 切换为对应角色的主菜单
   currentMenu->removeItem("登录");
   if (user->getRole() == "admin") {
-    addUserMgrMenu(currentMenu);
-    addBookMgrMenu(currentMenu);
-    addBookSearchMenu(currentMenu);
+    createUserMgrMenu(currentMenu);
+    createBookMgrMenu(currentMenu);
+    createBookSearchMenu(currentMenu);
   } else {
-    addBookSearchMenu(currentMenu);
-    addUserBookMapMgrMenu(currentMenu);
+    createBookSearchMenu(currentMenu);
+    createUserBookMapMgrMenu(currentMenu);
   }
 }
 
@@ -89,7 +95,7 @@ Menu *BookSys::createMainMenuForReader() { return nullptr; }
 Menu *BookSys::createMainMenuForAdmin() { return nullptr; }
 
 // 动态增加账户管理菜单
-Menu *BookSys::addUserMgrMenu(Menu *parentMenu) {
+Menu *BookSys::createUserMgrMenu(Menu *parentMenu) {
   Menu *userMenu = new Menu("账户管理", parentMenu);
   userMenu->addItem("列出所有账户", LIST_USER);
   userMenu->addItem("查询账户", FIND_USER);
@@ -100,7 +106,7 @@ Menu *BookSys::addUserMgrMenu(Menu *parentMenu) {
 }
 
 // 动态增加书籍管理菜单
-Menu *BookSys::addBookMgrMenu(Menu *parentMenu) {
+Menu *BookSys::createBookMgrMenu(Menu *parentMenu) {
   Menu *bookMgrMenu = new Menu("书籍管理", parentMenu);
   bookMgrMenu->addItem("列出所有书籍", LIST_BOOK);
   bookMgrMenu->addItem("新增书籍", ADD_BOOK);
@@ -110,7 +116,7 @@ Menu *BookSys::addBookMgrMenu(Menu *parentMenu) {
 }
 
 // 动态增加数据搜索菜单
-Menu *BookSys::addBookSearchMenu(Menu *parentMenu) {
+Menu *BookSys::createBookSearchMenu(Menu *parentMenu) {
   Menu *bookSearchMenu = new Menu("书籍查找", parentMenu);
   bookSearchMenu->addItem("书名查找", FIND_BOOK_NAME);
   bookSearchMenu->addItem("ISBN/ISSN编号查找", FIND_BOOK_ISBN);
@@ -120,7 +126,7 @@ Menu *BookSys::addBookSearchMenu(Menu *parentMenu) {
 }
 
 // 动态增加借阅管理菜单
-Menu *BookSys::addUserBookMapMgrMenu(Menu *parentMenu) {
+Menu *BookSys::createUserBookMapMgrMenu(Menu *parentMenu) {
   Menu *borrowMenu = new Menu("书籍借阅管理", parentMenu);
   borrowMenu->addItem("本人书籍借阅情况", LIST_USER_BOOK);
   borrowMenu->addItem("书籍借阅", ADD_USER_BOOK);

@@ -63,17 +63,13 @@ public:
 
   bool init(); // 加载所有文件数据
 
-
-  // 动态增加主菜单
-  Menu *createLoginMenu();
-
-  Menu *createMainMenuForReader();
-  Menu *createMainMenuForAdmin();
-
-  Menu *addUserMgrMenu(Menu *parentMenu);        // 动态增加账户管理菜单
-  Menu *addBookMgrMenu(Menu *parentMenu);        // 动态增加书籍管理菜单
-  Menu *addBookSearchMenu(Menu *parentMenu);     // 动态增加数据搜索菜单
-  Menu *addUserBookMapMgrMenu(Menu *parentMenu); // 动态增加借阅管理菜单
+  Menu *createLoginMenu();                          // 登录菜单
+  Menu *createMainMenuForReader();                  // 读者主菜单
+  Menu *createMainMenuForAdmin();                   // 管理员主菜单
+  Menu *createUserMgrMenu(Menu *parentMenu);        // 动态增加账户管理菜单
+  Menu *createBookMgrMenu(Menu *parentMenu);        // 动态增加书籍管理菜单
+  Menu *createBookSearchMenu(Menu *parentMenu);     // 动态增加数据搜索菜单
+  Menu *createUserBookMapMgrMenu(Menu *parentMenu); // 动态增加借阅管理菜单
 
   void login(); // 处理用户登录逻辑
 
