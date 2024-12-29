@@ -54,33 +54,6 @@ bool BookSys::init() {
   return true;
 }
 
-// 处理用户登录逻辑
-void BookSys::login() {
-  std::string account = input("账户名称");
-  std::string password = input("账户" + account + "的密码", false);
-  clearScreen();
-
-  User *user = userService->checkUser(account);
-  if (user == nullptr || user->getPassword() != password) {
-    std::cout << "登录失败, 账号密码错误" << std::endl;
-    return;
-  }
-
-  std::cout << "登录成功，您的角色为：" << user->getRole() << std::endl;
-  currentUser = user;
-
-  // 切换为对应角色的主菜单
-  currentMenu->removeItem("登录");
-  if (user->getRole() == "admin") {
-    createUserMgrMenu(currentMenu);
-    createBookMgrMenu(currentMenu);
-    createBookSearchMenu(currentMenu);
-  } else {
-    createBookSearchMenu(currentMenu);
-    createUserBookMapMgrMenu(currentMenu);
-  }
-}
-
 // 动态增加主菜单
 Menu *BookSys::createLoginMenu() {
   Menu *loginMenu = new Menu("登录菜单", nullptr, "");
@@ -134,9 +107,24 @@ Menu *BookSys::createUserBookMapMgrMenu(Menu *parentMenu) {
 }
 
 void BookSys::execAction(int action) {
-  if (action == ADMIN_LOGIN) {
+  if (action == GOBACK) {
+  } else if (action == ADMIN_LOGIN) {
     std::string account = input("管理员账户名称");
     std::string password = input("管理员账户" + account + "的密码", false);
+
+    User *user = userService->checkUser(account);
+    if (user == nullptr || user->getPassword() != password) {
+      std::cout << "登录失败, 账号密码错误" << std::endl;
+      return;
+    }
+
+    std::cout << "登录成功，您的角色为：" << user->getRole() << std::endl;
+    currentUser = user;
+
+  } else if (action == READER_LOGIN) {
+    std::string account = input("r账户名称");
+    std::string password = input("r账户" + account + "的密码", false);
+    clearScreen();
 
     User *user = userService->checkUser(account);
     if (user == nullptr || user->getPassword() != password) {

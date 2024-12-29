@@ -19,9 +19,10 @@
 #include "menu.h"
 #include "service.h"
 
+#define GOBACK 0
+
 #define ADMIN_LOGIN 1
 #define READER_LOGIN 1
-#define LOGOUT 1
 
 #define LIST_USER 2
 #define FIND_USER 2
@@ -66,12 +67,10 @@ public:
   Menu *createLoginMenu();                          // 登录菜单
   Menu *createMainMenuForReader();                  // 读者主菜单
   Menu *createMainMenuForAdmin();                   // 管理员主菜单
-  Menu *createUserMgrMenu(Menu *parentMenu);        // 动态增加账户管理菜单
-  Menu *createBookMgrMenu(Menu *parentMenu);        // 动态增加书籍管理菜单
-  Menu *createBookSearchMenu(Menu *parentMenu);     // 动态增加数据搜索菜单
-  Menu *createUserBookMapMgrMenu(Menu *parentMenu); // 动态增加借阅管理菜单
-
-  void login(); // 处理用户登录逻辑
+  Menu *createUserMgrMenu(Menu *parentMenu);        // 账户管理菜单
+  Menu *createBookMgrMenu(Menu *parentMenu);        // 书籍管理菜单
+  Menu *createBookSearchMenu(Menu *parentMenu);     // 数据搜索菜单
+  Menu *createUserBookMapMgrMenu(Menu *parentMenu); // 借阅管理菜单
 
   void execAction(int action);
 
