@@ -1,6 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <stdatomic.h>
 #include <string>
 
 // 用户类
@@ -10,6 +11,9 @@ private:
   std::string password; // 密码
   std::string role;     // 角色: admin-管理员, user-用户
 public:
+  User() {}
+  User(const std::string account, const std::string password, const std::string role)
+      : account(account), password(password), role(role) {}
   // 获取私有成员
   std::string getAccount() const { return account; }
   std::string getPassword() const { return password; }
@@ -31,6 +35,12 @@ private:
   int capacity;        // 库存
   int borrow;          // 借阅次数
 public:
+  Book() {}
+  Book(const std::string name, const std::string isbn, const std::string author,
+       const std::string publish, const std::string price, int capacity)
+      : name(name), isbn(isbn), author(author), publish(publish), price(price),
+        capacity(capacity) {}
+
   // 获取私有成员
   std::string getName() const { return name; }
   std::string getISBN() const { return isbn; }

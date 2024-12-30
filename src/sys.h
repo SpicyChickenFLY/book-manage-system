@@ -64,18 +64,29 @@ public:
 
   bool init(); // 加载所有文件数据
 
-  Menu *createLoginMenu();                          // 登录菜单
-  Menu *createMainMenuForReader();                  // 读者主菜单
-  Menu *createMainMenuForAdmin();                   // 管理员主菜单
-  Menu *createUserMgrMenu(Menu *parentMenu);        // 账户管理菜单
-  Menu *createBookMgrMenu(Menu *parentMenu);        // 书籍管理菜单
-  Menu *createBookSearchMenu(Menu *parentMenu);     // 数据搜索菜单
-  Menu *createUserBookMapMgrMenu(Menu *parentMenu); // 借阅管理菜单
+
+  void clearScreen();
+  std::string getInput(std::string desc, bool echo = true);
+  std::string inputPwd();
+  std::string inputStr();
+  std::string inputOneStr(std::string desc, bool echo = true);
+  User* inputUserAccountPassword(); // 用户输入账密信息
+  User* inputUser(); // 用户输入完整账户信息
+  Book* inputBook(); // 用户输入完整书籍信息
+
+  Menu* createLoginMenu();                          // 登录菜单
+  Menu* createMainMenuForReader();                  // 读者主菜单
+  Menu* createMainMenuForAdmin();                   // 管理员主菜单
+  Menu* createUserMgrMenu(Menu *parentMenu);        // 账户管理菜单
+  Menu* createBookMgrMenu(Menu *parentMenu);        // 书籍管理菜单
+  Menu* createBookSearchMenu(Menu *parentMenu);     // 数据搜索菜单
+  Menu* createUserBookMapMgrMenu(Menu *parentMenu); // 借阅管理菜单
 
   void execAction(int action);
 
   // 系统的循环运行逻辑
   void run();
 };
+
 
 #endif // !SYS_H

@@ -93,9 +93,23 @@ User *UserService::checkUser(const std::string &account) {
   return nullptr;
 }
 
+
+User *UserService::checkUserLogin(User *entity) {
+  std::string account = entity->getAccount();
+  std::string password = entity->getPassword();
+  for (User &user : users) {
+    if (user.getAccount() == account && user.getPassword() == password) {
+      return &user;
+    }
+  }
+  return nullptr;
+}
+
 // 添加记录
-void UserService::addUser(const std::string &account, const std::string &password,
-             const std::string &role) {
+void UserService::addUser(User *user) {
+  std::string account = user->getAccount();
+  std::string password = user->getPassword();
+  std::string role = user->getRole();
   if (checkUser(account) != nullptr) {
     std::cout << "创建用户失败, 用户(" + account + ") 已经存在" << std::endl;
     return;
@@ -104,12 +118,8 @@ void UserService::addUser(const std::string &account, const std::string &passwor
     std::cout << "创建用户失败, 角色必须是admin或者user" << std::endl;
     return;
   }
-  User user;
-  user.setAccount(account);
-  user.setPassword(password);
-  user.setRole(role);
 
-  users.push_back(user);
+  users.push_back(*user);
   if (save()) {
     std::cout << "创建用户成功" << std::endl;
   } else {
@@ -136,8 +146,10 @@ void UserService::deleteUser(const std::string &account) {
 }
 
 // 更新记录
-void UserService::updateUser(const std::string &account, const std::string &password,
-                const std::string &role) {
+void UserService::updateUser(User *user) {
+  std::string account = user->getAccount();
+  std::string password = user->getPassword();
+  std::string role = user->getRole();
   if (role != "admin" && role != "user") {
     std::cout << "更新用户失败, 角色必须是admin或user" << std::endl;
     return;

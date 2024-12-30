@@ -1,39 +1,35 @@
 #include "sys.h"
 
 // 清屏函数
+void BookSys::clearScreen() {
 #ifdef _WIN32
-void clearScreen() {
   system("cls"); // windows bat 清屏命令
-}
-std::string inputPwd() {
-  std::string temp;
-  while (true) {
-    char ch = getch();
-    if (ch == '\r' || ch == '\n')
-      break;
-    temp += ch;
-  }
-  return temp;
-}
 #else
-void clearScreen() {
-  // system("clear"); // 类unix shell 清屏命令
-  std::cout << std::endl;
-}
-
-std::string inputPwd() { return getpass(""); }
+  system("clear"); // 类unix shell 清屏命令
 #endif
-
-std::string inputStr() {
-  std::string temp;
-  getline(std::cin, temp);
-  return temp;
 }
 
 // 显示需要输入的内容，并获取用户输入，支持明文/密码两种方式
-std::string input(std::string desc, bool echo = true) {
+std::string BookSys::getInput(std::string desc, bool echo) {
   std::cout << "请输入" << desc << ": ";
-  return echo ? inputStr() : inputPwd();
+  if (echo) {
+    std::string temp;
+    getline(std::cin, temp);
+    return temp;
+  } else {
+#ifdef _WIN32
+    std::string temp;
+    while (true) {
+      char ch = getch();
+      if (ch == '\r' || ch == '\n')
+        break;
+      temp += ch;
+    }
+    return temp;
+#else
+    return getpass("");
+#endif
+  }
 }
 
 BookSys::BookSys(UserService *us, BookService *bs, UserBookMapService *ubms)
@@ -45,13 +41,47 @@ BookSys::BookSys(UserService *us, BookService *bs, UserBookMapService *ubms)
 
 bool BookSys::init() {
   // 初始化数据服务
-  if (!userService->load()) return false;
-  if (!bookService->load()) return false;
-  if (!userBookMapService->load()) return false;
+  if (!userService->load())
+    return false;
+  if (!bookService->load())
+    return false;
+  if (!userBookMapService->load())
+    return false;
 
   // 初始化系统菜单
 
   return true;
+}
+
+std::string BookSys::inputOneStr(std::string desc, bool echo) {
+  std::cin.ignore();
+  return getInput(desc, echo);
+}
+
+User *BookSys::inputUserAccountPassword() {
+  std::cin.ignore();
+  std::string account = input("账户名称");
+  std::string password = input("账户" + account + "的密码", false);
+  return new User(account, password, "");
+}
+
+User *BookSys::inputUser() {
+  std::cin.ignore();
+  std::string account = input("账户名称");
+  std::string password = input("账户" + account + "的密码", false);
+  std::string role = input("账户" + account + "的role");
+  return new User(account, password, role);
+}
+
+Book *BookSys::inputBook() {
+  std::cin.ignore();
+  std::string isbn = input("书籍ISBN号");
+  std::string name = input("书籍(" + isbn + ")的名称");
+  std::string author = input("书籍(" + isbn + ")的作者");
+  std::string publish = input("书籍(" + isbn + ")的出版社");
+  std::string price = input("书籍(" + isbn + ")的价格");
+  std::string capacity = input("书籍(" + isbn + ")的库存");
+  return new Book(name, isbn, author, publish, price, stoi(capacity));
 }
 
 // 动态增加主菜单
@@ -109,102 +139,60 @@ Menu *BookSys::createUserBookMapMgrMenu(Menu *parentMenu) {
 void BookSys::execAction(int action) {
   if (action == GOBACK) {
   } else if (action == ADMIN_LOGIN) {
-    std::string account = input("管理员账户名称");
-    std::string password = input("管理员账户" + account + "的密码", false);
-
-    User *user = userService->checkUser(account);
-    if (user == nullptr || user->getPassword() != password) {
+    User *entity = inputUserAccountPassword();
+    User *user = userService->checkUserLogin(entity);
+    if (user) {
+      std::cout << "登录成功" << std::endl;
+      currentUser = user;
+    } else {
       std::cout << "登录失败, 账号密码错误" << std::endl;
-      return;
+      // TODO: 目录回退
     }
-
-    std::cout << "登录成功，您的角色为：" << user->getRole() << std::endl;
-    currentUser = user;
-
   } else if (action == READER_LOGIN) {
-    std::string account = input("r账户名称");
-    std::string password = input("r账户" + account + "的密码", false);
-    clearScreen();
-
-    User *user = userService->checkUser(account);
-    if (user == nullptr || user->getPassword() != password) {
+    User *entity = inputUserAccountPassword();
+    User *user = userService->checkUserLogin(entity);
+    if (user) {
+      std::cout << "登录成功" << std::endl;
+      currentUser = user;
+    } else {
       std::cout << "登录失败, 账号密码错误" << std::endl;
-      return;
+      // TODO: 目录回退
     }
-
-    std::cout << "登录成功，您的角色为：" << user->getRole() << std::endl;
-    currentUser = user;
 
   } else if (action == LIST_USER) {
     this->userService->listUsers();
-
   } else if (action == FIND_USER) {
-    std::cin.ignore();
-    std::string account = input("账户名称");
-    this->userService->findUser(account);
-
+    this->userService->findUser(inputOneStr("账户名称"));
   } else if (action == ADD_USER) {
-    std::cin.ignore();
-    std::string account = input("账户名称");
-    std::string password = input("账户" + account + "的密码");
-    std::string role = input("账户" + account + "的role");
-    this->userService->addUser(account, password, role);
-
+    this->userService->addUser(inputUser());
   } else if (action == DEL_USER) {
-    std::cin.ignore();
-    std::string account = input("账户名称");
-    this->userService->deleteUser(account);
-
+    this->userService->deleteUser(inputOneStr("账户名称"));
   } else if (action == UPD_USER) {
-    std::cin.ignore();
-    std::string account = input("账户名称");
-    std::string password = input("账户" + account + "的密码");
-    std::string role = input("账户" + account + "的role");
-    this->userService->updateUser(account, password, role);
-
-  } else if (action == LIST_BOOK) {
+    this->userService->updateUser(inputUser());
+  }
+  // 
+  else if (action == LIST_BOOK) {
     this->bookService->listBooks();
-
   } else if (action == ADD_BOOK) {
-    std::cin.ignore();
-    std::string isbn = input("书籍ISBN号");
-    std::string name = input("书籍(" + isbn + ")的名称");
-    std::string author = input("书籍(" + isbn + ")的作者");
-    std::string publish = input("书籍(" + isbn + ")的出版社");
-    std::string price = input("书籍(" + isbn + ")的价格");
-    std::string capacity = input("书籍(" + isbn + ")的库存");
-    this->bookService->addBook(name, isbn, author, publish, price,
-                               stoi(capacity));
-
+    this->bookService->addBook(inputBook());
   } else if (action == DEL_BOOK) {
     std::cin.ignore();
     std::string isbn = input("请输入书籍ISBN/ISSN编号");
     this->bookService->deleteBook(isbn);
   } else if (action == UPD_BOOK) {
-    std::cin.ignore();
-    std::string isbn = input("书籍ISBN号");
-    std::string name = input("书籍(" + isbn + ")的名称");
-    std::string author = input("书籍(" + isbn + ")的作者");
-    std::string publish = input("书籍(" + isbn + ")的出版社");
-    std::string price = input("书籍(" + isbn + ")的价格");
-    std::string capacity = input("书籍(" + isbn + ")的库存");
-    this->bookService->updateBook(name, isbn, author, publish, price,
-                                  stoi(capacity));
+    this->bookService->updateBook(inputBook());
+
   } else if (action == FIND_BOOK_NAME) {
-    std::cin.ignore();
-    std::string name = input("书籍名称");
-    this->bookService->listBooksForName(name);
+    this->bookService->listBooksForName(inputOneStr("书籍名称"));
   } else if (action == FIND_BOOK_ISBN) {
-    std::cin.ignore();
-    std::string isbn = input("书籍ISBN号");
-    this->bookService->findBookForISBN(isbn);
+    this->bookService->findBookForISBN(inputOneStr("书籍ISBN号"));
   } else if (action == FIND_BOOK_AUTHOR) {
-    std::cin.ignore();
-    std::string author = input("作者");
-    this->bookService->listBookForAuthor(author);
+    this->bookService->listBookForAuthor(inputOneStr("作者"));
   } else if (action == LIST_BOOK_BORROW) {
     this->bookService->listBooksByBorrow(10);
-  } else if (action == ADD_USER_BOOK) {
+  }
+  // 
+  else if (action == ADD_USER_BOOK) {
     this->userBookMapService->listBooksForUser(currentUser->getAccount());
   } else if (action == DEL_USER_BOOK) {
     std::cin.ignore();
@@ -214,8 +202,7 @@ void BookSys::execAction(int action) {
   } else if (action == UPD_USER_BOOK) {
     std::cin.ignore();
     std::string isbn = input("书籍ISBN/ISSN编号");
-    this->userBookMapService->deleteUserBookMap(currentUser->getAccount(),
-                                                isbn);
+    this->userBookMapService->deleteUserBookMap(currentUser->getAccount(), isbn);
     this->bookService->returnBook(isbn);
   }
 }

@@ -31,12 +31,11 @@ public:
   void listUsers();
   void findUser(const std::string &account);
   User *checkUser(const std::string &account);
+  User *checkUserLogin(User *entity);
 
-  void addUser(const std::string &account, const std::string &password,
-               const std::string &role);       // 添加记录
+  void addUser(User *user);              // 添加记录
   void deleteUser(const std::string &account); // 删除记录
-  void updateUser(const std::string &account, const std::string &password,
-                  const std::string &role);
+  void updateUser(User *user);           // 更新记录
   // 更新记录
 };
 
@@ -62,13 +61,9 @@ public:
   void listBooksByBorrow(int limit);
   Book *checkBook(const std::string &isbn);
 
-  void addBook(const std::string &name, const std::string &isbn,
-               const std::string &author, const std::string &publish,
-               const std::string &price, int capacity); // 添加记录
+  void addBook(Book *book);                 // 添加记录
   void deleteBook(const std::string &isbn); // 删除记录
-  void updateBook(const std::string &name, const std::string &isbn,
-                  const std::string &author, const std::string &publish,
-                  const std::string &price, int capacity); // 更新记录
+  void updateBook(Book *book);              // 更新记录
   bool borrowBook(const std::string &isbn);
   bool returnBook(const std::string &isbn);
 };
@@ -89,8 +84,10 @@ public:
                                 const std::string &isbn);
   void listBooksForUser(const std::string &account);
 
-  void addUserBookMap(const std::string &account, const std::string &isbn); // 添加记录
-  void deleteUserBookMap(const std::string &account, const std::string &isbn); // 删除记录
+  void addUserBookMap(const std::string &account,
+                      const std::string &isbn); // 添加记录
+  void deleteUserBookMap(const std::string &account,
+                         const std::string &isbn); // 删除记录
 };
 
 #endif // !SERVICE_H

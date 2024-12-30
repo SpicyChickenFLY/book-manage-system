@@ -144,23 +144,20 @@ Book *BookService::checkBook(const std::string &isbn) {
 }
 
 // 添加记录
-void BookService::addBook(const std::string &name, const std::string &isbn,
-             const std::string &author, const std::string &publish,
-             const std::string &price, int capacity) {
+void BookService::addBook(Book *entity) {
+  std::string name = entity->getName();
+  std::string isbn = entity->getISBN();
+  std::string author = entity->getAuthor();
+  std::string publish = entity->getPublish();
+  std::string price = entity->getPrice();
+  int capacity = entity->getCapacity();
+
   if (checkBook(isbn) != nullptr) {
     std::cout << "新增书籍失败, 书籍(" << isbn << ")已经存在" << std::endl;
     return;
   }
-  Book book;
-  book.setName(name);
-  book.setISBN(isbn);
-  book.setAuthor(author);
-  book.setPublish(publish);
-  book.setPrice(price);
-  book.setCapacity(capacity);
-  book.setBorrow(0);
 
-  books.push_back(book);
+  books.push_back(*entity);
   if (save()) {
     std::cout << "新增书籍成功" << std::endl;
   } else {
@@ -186,9 +183,14 @@ void BookService::deleteBook(const std::string &isbn) {
 }
 
 // 更新记录
-void BookService::updateBook(const std::string &name, const std::string &isbn,
-                const std::string &author, const std::string &publish,
-                const std::string &price, int capacity) {
+void BookService::updateBook(Book *entity) {
+  std::string name = entity->getName();
+  std::string isbn = entity->getISBN();
+  std::string author = entity->getAuthor();
+  std::string publish = entity->getPublish();
+  std::string price = entity->getPrice();
+  int capacity = entity->getCapacity();
+
   for (Book &book : books) {
     if (book.getISBN() == isbn) {
       book.setName(name);
@@ -246,110 +248,3 @@ bool BookService::returnBook(const std::string &isbn) {
   return false;
 }
 
-UserBookMapService::UserBookMapService(const std::string &fn) : filename(fn) {}
-
-bool UserBookMapService::load() {
-  std::ifstream file(filename);
-  if (!file.is_open()) {
-    std::cerr << "初始化借阅信息数据库失败，无法打开文件: " << filename << std::endl;
-    return false;
-  }
-
-  std::string line;
-  while (getline(file, line)) {
-    UserBookMap userBookMap;
-    std::stringstream ss(line);
-    std::string field;
-
-    getline(ss, field, ',');
-    userBookMap.setAccount(field);
-    getline(ss, field, ',');
-    userBookMap.setISBN(field);
-
-    userBookMaps.push_back(userBookMap);
-  }
-
-  file.close();
-  return true;
-}
-
-// 保存记录到文件
-bool UserBookMapService::save() {
-  std::ofstream file(filename);
-  if (!file.is_open()) {
-    std::cerr << "无法打开文件: " << filename << std::endl;
-    return false;
-  }
-
-  for (const UserBookMap &userBookMap : userBookMaps) {
-    file << userBookMap.getAccount() << "," << userBookMap.getISBN() << "\n";
-  }
-
-  file.close();
-  return true;
-}
-
-UserBookMap *UserBookMapService::checkUserBookMap(const std::string &account,
-                              const std::string &isbn) {
-  for (UserBookMap &userBookMap : userBookMaps) {
-    if (userBookMap.getAccount() == account &&
-        userBookMap.getISBN() == isbn) {
-      return &userBookMap;
-    }
-  }
-  return nullptr;
-}
-
-void UserBookMapService::listBooksForUser(const std::string &account) {
-  std::cout << "|    ISBN  |" << std::endl;
-  std::cout << "| =======  |" << std::endl;
-  int count = 0;
-  for (UserBookMap &userBookMap : userBookMaps) {
-    if (userBookMap.getAccount() == account) {
-      std::cout << "|" << std::setw(8) << userBookMap.getISBN() << " |"
-                << std::endl;
-      count++;
-    }
-  }
-  std::cout << "共 " << count << " 条记录" << std::endl;
-}
-
-// 添加记录
-void UserBookMapService::addUserBookMap(const std::string &account, const std::string &isbn) {
-  if (checkUserBookMap(account, isbn) != nullptr) {
-    std::cout << "登记借阅失败, 用户(" + account + ") 已经拥有书籍(" << isbn
-              << ")" << std::endl;
-    return;
-  }
-  UserBookMap userBookMap;
-  userBookMap.setAccount(account);
-  userBookMap.setISBN(isbn);
-
-  userBookMaps.push_back(userBookMap);
-  if (save()) {
-    std::cout << "登记借阅成功" << std::endl;
-  } else {
-    std::cout << "登记借阅失败, 文件写入异常" << std::endl;
-  }
-}
-
-// 删除记录
-void UserBookMapService::deleteUserBookMap(const std::string &account, const std::string &isbn) {
-  if (checkUserBookMap(account, isbn) == nullptr) {
-    std::cout << "登记归还失败, 用户(" + account + ") 未借阅书籍(" << isbn
-              << ")" << std::endl;
-    return;
-  }
-  userBookMaps.erase(
-      remove_if(userBookMaps.begin(), userBookMaps.end(),
-                [account, isbn](const UserBookMap &userBookMap) {
-                  return userBookMap.getAccount() == account &&
-                         userBookMap.getISBN() == isbn;
-                }),
-      userBookMaps.end());
-  if (save()) {
-    std::cout << "登记归还成功" << std::endl;
-  } else {
-    std::cout << "登记归还失败, 文件写入异常" << std::endl;
-  }
-}
