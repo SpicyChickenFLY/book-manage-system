@@ -59,15 +59,13 @@ private:
 
   UserService *userService;               // 用户服务
   BookService *bookService;               // 书籍服务
-  UserBookMapService *userBookMapService; // 借阅服务
+  BorrowService *borrowService; // 借阅服务
 
 public:
-  System(UserService *us, BookService *bs, UserBookMapService *ubms);
+  System(UserService *us, BookService *bs, BorrowService *brs);
 
   bool init(); // 加载所有文件数据
 
-  std::string inputPwd(); // 无痕输入密码
-  std::string inputStr(); // 正常输入文字
   std::string getInput(std::string desc,
                        bool echo = true); // 获取用户输入，支持明文/密码两种方式
   std::string inputOneStr(std::string desc,

@@ -7,9 +7,9 @@
 #include "service.h"
 #include <vector>
 
-UserBookMapService::UserBookMapService(const std::string &fn) : filename(fn) {}
+BorrowService::BorrowService(const std::string &fn) : filename(fn) {}
 
-bool UserBookMapService::load() {
+bool BorrowService::load() {
   std::ifstream file(filename);
   if (!file.is_open()) {
     std::cerr << "无法打开借阅文件: " << filename << std::endl;
@@ -35,7 +35,7 @@ bool UserBookMapService::load() {
 }
 
 // 保存记录到文件
-bool UserBookMapService::save() {
+bool BorrowService::save() {
   std::ofstream file(filename);
   if (!file.is_open()) {
     std::cerr << "无法打开文件: " << filename << std::endl;
@@ -50,7 +50,7 @@ bool UserBookMapService::save() {
   return true;
 }
 
-std::vector<UserBookMap> UserBookMapService::listBooksForUser(const std::string &account) {
+std::vector<UserBookMap> BorrowService::listBooksForUser(const std::string &account) {
   std::vector<UserBookMap> result;
   for (UserBookMap &userBookMap : userBookMaps) {
     if (userBookMap.getAccount() == account) {
@@ -60,7 +60,7 @@ std::vector<UserBookMap> UserBookMapService::listBooksForUser(const std::string 
   return result;
 }
 
-UserBookMap *UserBookMapService::findUserBookMap(const std::string &account,
+UserBookMap *BorrowService::findUserBookMap(const std::string &account,
                               const std::string &isbn) {
   for (UserBookMap &userBookMap : userBookMaps) {
     if (userBookMap.getAccount() == account &&
@@ -72,7 +72,7 @@ UserBookMap *UserBookMapService::findUserBookMap(const std::string &account,
 }
 
 // 添加记录
-void UserBookMapService::addUserBookMap(const std::string &account, const std::string &isbn) {
+void BorrowService::addUserBookMap(const std::string &account, const std::string &isbn) {
   if (findUserBookMap(account, isbn) != nullptr) {
     std::cout << "登记借阅失败, 用户(" + account + ") 已经拥有书籍(" << isbn
               << ")" << std::endl;
@@ -91,7 +91,7 @@ void UserBookMapService::addUserBookMap(const std::string &account, const std::s
 }
 
 // 删除记录
-void UserBookMapService::deleteUserBookMap(const std::string &account, const std::string &isbn) {
+void BorrowService::deleteUserBookMap(const std::string &account, const std::string &isbn) {
   if (findUserBookMap(account, isbn) == nullptr) {
     std::cout << "登记归还失败, 用户(" + account + ") 未借阅书籍(" << isbn
               << ")" << std::endl;

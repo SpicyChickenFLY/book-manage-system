@@ -1,5 +1,4 @@
 #include "sys.h"
-#include <iostream>
 
 // 显示需要输入的内容，并获取用户输入，支持明文/密码两种方式
 std::string System::getInput(std::string desc, bool echo) {
@@ -24,8 +23,8 @@ std::string System::getInput(std::string desc, bool echo) {
   }
 }
 
-System::System(UserService *us, BookService *bs, UserBookMapService *ubms)
-    : userService(us), bookService(bs), userBookMapService(ubms) {
+System::System(UserService *us, BookService *bs, BorrowService *brs)
+    : userService(us), bookService(bs), borrowService(brs) {
   currentUser = new User();
   currentUser->setAccount("游客");
   currentMenu = createLoginMenu();
@@ -37,7 +36,7 @@ bool System::init() {
     return false;
   if (!bookService->load())
     return false;
-  if (!userBookMapService->load())
+  if (!borrowService->load())
     return false;
 
   // 初始化系统菜单
@@ -280,14 +279,14 @@ Menu *System::execAction(int action) {
   // 借阅管理
   else if (action == LIST_USER_BOOK) {
     outputUserBookMaps(
-        userBookMapService->listBooksForUser(currentUser->getAccount()));
+        borrowService->listBooksForUser(currentUser->getAccount()));
   } else if (action == ADD_USER_BOOK) {
     std::string isbn = inputOneStr("书籍ISBN/ISSN编号");
     bookService->borrowBook(isbn);
-    userBookMapService->addUserBookMap(currentUser->getAccount(), isbn);
+    borrowService->addUserBookMap(currentUser->getAccount(), isbn);
   } else if (action == DEL_USER_BOOK) {
     std::string isbn = inputOneStr("书籍ISBN/ISSN编号");
-    userBookMapService->deleteUserBookMap(currentUser->getAccount(), isbn);
+    borrowService->deleteUserBookMap(currentUser->getAccount(), isbn);
     bookService->returnBook(isbn);
   }
 
@@ -304,8 +303,9 @@ void System::run() {
     std::cout << std::endl;
   }
   std::cout << "欢迎使用图书管理系统，请先登录" << std::endl;
+
   while (true) {
-    currentMenu->showMenu(currentUser->getAccount());
+    currentMenu->showMenu(currentUser->getAccount()); // 显示菜单内容
 
     int choice;
     std::cin >> choice;

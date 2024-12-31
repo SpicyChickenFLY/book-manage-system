@@ -49,7 +49,7 @@ public:
 
   bool load();
   bool save(); // 保存记录到文件
-
+  
   std::vector<Book> listBooks();
   std::vector<Book> listBooksForName(const std::string &name);
   std::vector<Book> listBookForAuthor(const std::string &author);
@@ -65,13 +65,13 @@ public:
 };
 
 // 用户书籍借阅关系服务
-class UserBookMapService {
+class BorrowService {
 private:
   std::string filename;
   std::vector<UserBookMap> userBookMaps;
 
 public:
-  UserBookMapService(const std::string &fn);
+  BorrowService(const std::string &fn);
 
   bool load();
   bool save(); // 保存记录到文件

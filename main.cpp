@@ -11,10 +11,10 @@ int main() {
     // 初始化 账户、书籍、借阅关系服务
     UserService *userService = new UserService("./data/user.csv");
     BookService *bookService = new BookService("./data/book.csv");
-    UserBookMapService *userBookMapService = new UserBookMapService("./data/book_user_map.csv");
+    BorrowService *borrowService = new BorrowService("./data/borrow.csv");
 
     // 运行图书管理系统
-    System *system = new System(userService, bookService, userBookMapService);
+    System *system = new System(userService, bookService, borrowService);
     if (!system->init()) {
         std::cout << "图书管理系统初始化失败" << std::endl;
     }
