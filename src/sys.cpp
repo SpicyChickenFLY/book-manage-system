@@ -1,16 +1,8 @@
 #include "sys.h"
-
-// 清屏函数
-void BookSys::clearScreen() {
-#ifdef _WIN32
-  system("cls"); // windows bat 清屏命令
-#else
-  system("clear"); // 类unix shell 清屏命令
-#endif
-}
+#include <iostream>
 
 // 显示需要输入的内容，并获取用户输入，支持明文/密码两种方式
-std::string BookSys::getInput(std::string desc, bool echo) {
+std::string System::getInput(std::string desc, bool echo) {
   std::cout << "请输入" << desc << ": ";
   if (echo) {
     std::string temp;
@@ -32,14 +24,14 @@ std::string BookSys::getInput(std::string desc, bool echo) {
   }
 }
 
-BookSys::BookSys(UserService *us, BookService *bs, UserBookMapService *ubms)
+System::System(UserService *us, BookService *bs, UserBookMapService *ubms)
     : userService(us), bookService(bs), userBookMapService(ubms) {
-  User *currentUser = new User();
-  currentUser->setAccount("guest");
+  currentUser = new User();
+  currentUser->setAccount("游客");
   currentMenu = createLoginMenu();
 }
 
-bool BookSys::init() {
+bool System::init() {
   // 初始化数据服务
   if (!userService->load())
     return false;
@@ -53,53 +45,124 @@ bool BookSys::init() {
   return true;
 }
 
-std::string BookSys::inputOneStr(std::string desc, bool echo) {
+std::string System::inputOneStr(std::string desc, bool echo) {
   std::cin.ignore();
-  return getInput(desc, echo);
+  std::string str = getInput(desc, echo);
+  std::cout << std::endl;
+  return str;
 }
 
-User *BookSys::inputUserAccountPassword() {
+User *System::inputUserAuthInfo() {
   std::cin.ignore();
-  std::string account = input("账户名称");
-  std::string password = input("账户" + account + "的密码", false);
+  std::string account = getInput("账户名称");
+  std::string password = getInput("账户" + account + "的密码", false);
+  std::cout << std::endl;
   return new User(account, password, "");
 }
 
-User *BookSys::inputUser() {
+User *System::inputUser() {
   std::cin.ignore();
-  std::string account = input("账户名称");
-  std::string password = input("账户" + account + "的密码", false);
-  std::string role = input("账户" + account + "的role");
+  std::string account = getInput("账户名称");
+  std::string password = getInput("账户" + account + "的密码", false);
+  std::string role = getInput("账户" + account + "的role");
+  std::cout << std::endl;
   return new User(account, password, role);
 }
 
-Book *BookSys::inputBook() {
+Book *System::inputBook() {
   std::cin.ignore();
-  std::string isbn = input("书籍ISBN号");
-  std::string name = input("书籍(" + isbn + ")的名称");
-  std::string author = input("书籍(" + isbn + ")的作者");
-  std::string publish = input("书籍(" + isbn + ")的出版社");
-  std::string price = input("书籍(" + isbn + ")的价格");
-  std::string capacity = input("书籍(" + isbn + ")的库存");
+  std::string isbn = getInput("书籍ISBN号");
+  std::string name = getInput("书籍(" + isbn + ")的名称");
+  std::string author = getInput("书籍(" + isbn + ")的作者");
+  std::string publish = getInput("书籍(" + isbn + ")的出版社");
+  std::string price = getInput("书籍(" + isbn + ")的价格");
+  std::string capacity = getInput("书籍(" + isbn + ")的库存");
+  std::cout << std::endl;
   return new Book(name, isbn, author, publish, price, stoi(capacity));
 }
 
+void System::outputUser(User *user) {
+  if (user)
+    std::cout << "账户名称:" << user->getAccount() << std::endl
+              << "角色:" << user->getRole() << std::endl
+              << std::endl;
+  else
+    std::cout << "结果不存在" << std::endl;
+}
+
+void System::outputUsers(std::vector<User> users) {
+  for (User &user : users) {
+    outputUser(&user);
+  }
+  std::cout << "共 " << users.size() << " 条记录" << std::endl;
+}
+
+void System::outputBook(Book *book) {
+  if (book)
+    std::cout << "书籍名称:" << book->getName() << std::endl
+              << "ISBN:" << book->getISBN() << std::endl
+              << "作者:" << book->getAuthor() << std::endl
+              << "出版社:" << book->getPublish() << std::endl
+              << "价格:" << book->getPrice() << std::endl
+              << "库存:" << book->getCapacity() << std::endl
+              << "借阅次数:" << book->getBorrow() << std::endl
+              << std::endl;
+  else
+    std::cout << "结果不存在" << std::endl;
+}
+
+void System::outputBooks(std::vector<Book> books) {
+  for (Book &book : books) {
+    outputBook(&book);
+  }
+  std::cout << "共 " << books.size() << " 条记录" << std::endl;
+}
+
+void System::outputUserBookMap(UserBookMap *userBookMap) {
+  if (userBookMap)
+    std::cout << "账户名称:" << userBookMap->getAccount() << std::endl
+              << "ISBN:" << userBookMap->getISBN() << std::endl
+              << std::endl;
+  else
+    std::cout << "结果不存在" << std::endl;
+}
+
+void System::outputUserBookMaps(std::vector<UserBookMap> userBookMaps) {
+  for (UserBookMap &userBookMap : userBookMaps) {
+    outputUserBookMap(&userBookMap);
+  }
+  std::cout << "共 " << userBookMaps.size() << " 条记录" << std::endl;
+}
+
 // 动态增加主菜单
-Menu *BookSys::createLoginMenu() {
-  Menu *loginMenu = new Menu("登录菜单", nullptr, "");
+Menu *System::createLoginMenu() {
+  Menu *loginMenu = new Menu("登录菜单", nullptr);
   loginMenu->addItem("管理员登录", ADMIN_LOGIN);
   loginMenu->addItem("读者登录", READER_LOGIN);
   return loginMenu;
 }
 
-Menu *BookSys::createMainMenuForReader() { return nullptr; }
+Menu *System::createMainMenuForAdmin() {
+  Menu *adminMenu = new Menu("管理员菜单", nullptr);
+  adminMenu->addItem("账户管理", MGR_USER);
+  adminMenu->addItem("书籍管理", MGR_BOOK);
+  adminMenu->addItem("书籍查询", FIND_BOOK);
+  adminMenu->addItem("用户登出", LOGOUT);
+  return adminMenu;
+}
 
-Menu *BookSys::createMainMenuForAdmin() { return nullptr; }
+Menu *System::createMainMenuForReader() {
+  Menu *readerMenu = new Menu("读者菜单", nullptr);
+  readerMenu->addItem("书籍查询", FIND_BOOK);
+  readerMenu->addItem("书籍借阅归还", MGR_USER_BOOK);
+  readerMenu->addItem("用户登出", LOGOUT);
+  return readerMenu;
+}
 
 // 动态增加账户管理菜单
-Menu *BookSys::createUserMgrMenu(Menu *parentMenu) {
-  Menu *userMenu = new Menu("账户管理", parentMenu, "");
-  userMenu->addItem("列出所有账户", LIST_USER);
+Menu *System::createUserMgrMenu(Menu *parentMenu) {
+  Menu *userMenu = new Menu("账户管理", parentMenu);
+  // userMenu->addItem("列出所有账户", LIST_USER);
   userMenu->addItem("查询账户", FIND_USER);
   userMenu->addItem("新增账户", ADD_USER);
   userMenu->addItem("删除账户", DEL_USER);
@@ -108,9 +171,8 @@ Menu *BookSys::createUserMgrMenu(Menu *parentMenu) {
 }
 
 // 动态增加书籍管理菜单
-Menu *BookSys::createBookMgrMenu(Menu *parentMenu) {
-  Menu *bookMgrMenu = new Menu("书籍管理", parentMenu, "");
-  bookMgrMenu->addItem("列出所有书籍", LIST_BOOK);
+Menu *System::createBookMgrMenu(Menu *parentMenu) {
+  Menu *bookMgrMenu = new Menu("书籍管理", parentMenu);
   bookMgrMenu->addItem("新增书籍", ADD_BOOK);
   bookMgrMenu->addItem("删除书籍", DEL_BOOK);
   bookMgrMenu->addItem("更新书籍", UPD_BOOK);
@@ -118,8 +180,9 @@ Menu *BookSys::createBookMgrMenu(Menu *parentMenu) {
 }
 
 // 动态增加数据搜索菜单
-Menu *BookSys::createBookSearchMenu(Menu *parentMenu) {
-  Menu *bookSearchMenu = new Menu("书籍查找", parentMenu, "");
+Menu *System::createBookSearchMenu(Menu *parentMenu) {
+  Menu *bookSearchMenu = new Menu("书籍查找", parentMenu);
+  // bookSearchMenu->addItem("列出所有书籍", LIST_BOOK);
   bookSearchMenu->addItem("书名查找", FIND_BOOK_NAME);
   bookSearchMenu->addItem("ISBN/ISSN编号查找", FIND_BOOK_ISBN);
   bookSearchMenu->addItem("作者查找", FIND_BOOK_AUTHOR);
@@ -128,101 +191,128 @@ Menu *BookSys::createBookSearchMenu(Menu *parentMenu) {
 }
 
 // 动态增加借阅管理菜单
-Menu *BookSys::createUserBookMapMgrMenu(Menu *parentMenu) {
-  Menu *borrowMenu = new Menu("书籍借阅管理", parentMenu, "");
+Menu *System::createUserBookMapMgrMenu(Menu *parentMenu) {
+  Menu *borrowMenu = new Menu("书籍借阅管理", parentMenu);
   borrowMenu->addItem("本人书籍借阅情况", LIST_USER_BOOK);
   borrowMenu->addItem("书籍借阅", ADD_USER_BOOK);
   borrowMenu->addItem("书籍归还", DEL_USER_BOOK);
   return borrowMenu;
 }
 
-void BookSys::execAction(int action) {
+Menu *System::execAction(int action) {
+
+  // 登录菜单
   if (action == GOBACK) {
+    return currentMenu->getParentMenu();
   } else if (action == ADMIN_LOGIN) {
-    User *entity = inputUserAccountPassword();
-    User *user = userService->checkUserLogin(entity);
-    if (user) {
-      std::cout << "登录成功" << std::endl;
-      currentUser = user;
-    } else {
+    User *user = userService->checkUserLogin(inputUserAuthInfo());
+    if (!user) {
       std::cout << "登录失败, 账号密码错误" << std::endl;
-      // TODO: 目录回退
+      return nullptr;
     }
+    if (user->getRole() != "admin") {
+      std::cout << "登录失败, 用户权限不足" << std::endl;
+      return nullptr;
+    }
+    currentUser = user;
+    std::cout << "登录成功" << std::endl;
+    return createMainMenuForAdmin();
   } else if (action == READER_LOGIN) {
-    User *entity = inputUserAccountPassword();
-    User *user = userService->checkUserLogin(entity);
-    if (user) {
-      std::cout << "登录成功" << std::endl;
-      currentUser = user;
-    } else {
+    User *user = userService->checkUserLogin(inputUserAuthInfo());
+    if (!user) {
       std::cout << "登录失败, 账号密码错误" << std::endl;
-      // TODO: 目录回退
+      return nullptr;
     }
+    currentUser = user;
+    std::cout << "登录成功" << std::endl;
+    return createMainMenuForReader();
 
-  } else if (action == LIST_USER) {
-    this->userService->listUsers();
+    // 主菜单
+  } else if (action == MGR_USER) {
+    return createUserMgrMenu(currentMenu);
+  } else if (action == MGR_BOOK) {
+    return createBookMgrMenu(currentMenu);
+  } else if (action == MGR_USER_BOOK) {
+    return createUserBookMapMgrMenu(currentMenu);
+  } else if (action == LOGOUT) {
+    currentUser = new User();
+    currentUser->setAccount("游客");
+    return createLoginMenu();
+  }
+
+  // 账户管理菜单
+  else if (action == LIST_USER) {
+    outputUsers(userService->listUsers());
   } else if (action == FIND_USER) {
-    this->userService->findUser(inputOneStr("账户名称"));
+    outputUser(userService->findUser(inputOneStr("账户名称")));
   } else if (action == ADD_USER) {
-    this->userService->addUser(inputUser());
+    userService->addUser(inputUser());
   } else if (action == DEL_USER) {
-    this->userService->deleteUser(inputOneStr("账户名称"));
+    userService->deleteUser(inputOneStr("账户名称"));
   } else if (action == UPD_USER) {
-    this->userService->updateUser(inputUser());
+    userService->updateUser(inputUser());
   }
-  // 
-  else if (action == LIST_BOOK) {
-    this->bookService->listBooks();
-  } else if (action == ADD_BOOK) {
-    this->bookService->addBook(inputBook());
-  } else if (action == DEL_BOOK) {
-    std::cin.ignore();
-    std::string isbn = input("请输入书籍ISBN/ISSN编号");
-    this->bookService->deleteBook(isbn);
-  } else if (action == UPD_BOOK) {
-    this->bookService->updateBook(inputBook());
 
-  } else if (action == FIND_BOOK_NAME) {
-    this->bookService->listBooksForName(inputOneStr("书籍名称"));
-  } else if (action == FIND_BOOK_ISBN) {
-    this->bookService->findBookForISBN(inputOneStr("书籍ISBN号"));
+  // 书籍管理
+  else if (action == LIST_BOOK) {
+    outputBooks(bookService->listBooks());
+  } else if (action == FIND_BOOK) {
+    return createBookSearchMenu(currentMenu);
+  } else if (action == ADD_BOOK) {
+    bookService->addBook(inputBook());
+  } else if (action == DEL_BOOK) {
+    bookService->deleteBook(inputOneStr("书籍ISBN/ISSN编号"));
+  } else if (action == UPD_BOOK) {
+    bookService->updateBook(inputBook());
+  }
+
+  // 书籍查询
+  else if (action == FIND_BOOK_NAME) {
+    outputBooks(bookService->listBooksForName(inputOneStr("书籍名称")));
   } else if (action == FIND_BOOK_AUTHOR) {
-    this->bookService->listBookForAuthor(inputOneStr("作者"));
+    outputBooks(bookService->listBookForAuthor(inputOneStr("作者")));
   } else if (action == LIST_BOOK_BORROW) {
-    this->bookService->listBooksByBorrow(10);
+    outputBooks(bookService->listBooksByBorrow(10));
+  } else if (action == FIND_BOOK_ISBN) {
+    outputBook(bookService->findBookForISBN(inputOneStr("书籍ISBN/ISSN编号")));
   }
-  // 
-  else if (action == ADD_USER_BOOK) {
-    this->userBookMapService->listBooksForUser(currentUser->getAccount());
+
+  // 借阅管理
+  else if (action == LIST_USER_BOOK) {
+    outputUserBookMaps(
+        userBookMapService->listBooksForUser(currentUser->getAccount()));
+  } else if (action == ADD_USER_BOOK) {
+    std::string isbn = inputOneStr("书籍ISBN/ISSN编号");
+    bookService->borrowBook(isbn);
+    userBookMapService->addUserBookMap(currentUser->getAccount(), isbn);
   } else if (action == DEL_USER_BOOK) {
-    std::cin.ignore();
-    std::string isbn = input("书籍ISBN/ISSN编号");
-    this->bookService->borrowBook(isbn);
-    this->userBookMapService->addUserBookMap(currentUser->getAccount(), isbn);
-  } else if (action == UPD_USER_BOOK) {
-    std::cin.ignore();
-    std::string isbn = input("书籍ISBN/ISSN编号");
-    this->userBookMapService->deleteUserBookMap(currentUser->getAccount(), isbn);
-    this->bookService->returnBook(isbn);
+    std::string isbn = inputOneStr("书籍ISBN/ISSN编号");
+    userBookMapService->deleteUserBookMap(currentUser->getAccount(), isbn);
+    bookService->returnBook(isbn);
   }
+
+  else {
+    std::cout << "无效命令！" << std::endl;
+  }
+
+  return nullptr;
 }
 
 // 系统的循环运行逻辑
-void BookSys::run() {
-  clearScreen();
+void System::run() {
+  for (int i = 0; i < 50; i++) {
+    std::cout << std::endl;
+  }
   std::cout << "欢迎使用图书管理系统，请先登录" << std::endl;
   while (true) {
-    std::string who =
-        currentUser == nullptr ? "guest" : currentUser->getAccount();
-    currentMenu->showMenu(who);
+    currentMenu->showMenu(currentUser->getAccount());
 
     int choice;
     std::cin >> choice;
-    int action = currentMenu->handleChoice(choice);
 
-    execAction(action); // 执行命令
-
-    // TODO:
-    // currentMenu = newMenu; // 跳转目录
+    int action = currentMenu->handleChoice(choice); // 指定命令
+    Menu *menu = execAction(action);                // 执行命令
+    if (menu != nullptr)
+      currentMenu = menu; // 更新当前目录
   }
 }

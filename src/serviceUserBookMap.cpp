@@ -5,16 +5,14 @@
  */
 
 #include "service.h"
-
-// TODO: 需要把所有的标准输出的功能外移
-// service 只负责将正确的结果数组返回，不负责输出
+#include <vector>
 
 UserBookMapService::UserBookMapService(const std::string &fn) : filename(fn) {}
 
 bool UserBookMapService::load() {
   std::ifstream file(filename);
   if (!file.is_open()) {
-    std::cerr << "初始化借阅信息数据库失败，无法打开文件: " << filename << std::endl;
+    std::cerr << "无法打开借阅文件: " << filename << std::endl;
     return false;
   }
 
@@ -52,7 +50,17 @@ bool UserBookMapService::save() {
   return true;
 }
 
-UserBookMap *UserBookMapService::checkUserBookMap(const std::string &account,
+std::vector<UserBookMap> UserBookMapService::listBooksForUser(const std::string &account) {
+  std::vector<UserBookMap> result;
+  for (UserBookMap &userBookMap : userBookMaps) {
+    if (userBookMap.getAccount() == account) {
+      result.push_back(userBookMap);
+    }
+  }
+  return result;
+}
+
+UserBookMap *UserBookMapService::findUserBookMap(const std::string &account,
                               const std::string &isbn) {
   for (UserBookMap &userBookMap : userBookMaps) {
     if (userBookMap.getAccount() == account &&
@@ -63,23 +71,9 @@ UserBookMap *UserBookMapService::checkUserBookMap(const std::string &account,
   return nullptr;
 }
 
-void UserBookMapService::listBooksForUser(const std::string &account) {
-  std::cout << "|    ISBN  |" << std::endl;
-  std::cout << "| =======  |" << std::endl;
-  int count = 0;
-  for (UserBookMap &userBookMap : userBookMaps) {
-    if (userBookMap.getAccount() == account) {
-      std::cout << "|" << std::setw(8) << userBookMap.getISBN() << " |"
-                << std::endl;
-      count++;
-    }
-  }
-  std::cout << "共 " << count << " 条记录" << std::endl;
-}
-
 // 添加记录
 void UserBookMapService::addUserBookMap(const std::string &account, const std::string &isbn) {
-  if (checkUserBookMap(account, isbn) != nullptr) {
+  if (findUserBookMap(account, isbn) != nullptr) {
     std::cout << "登记借阅失败, 用户(" + account + ") 已经拥有书籍(" << isbn
               << ")" << std::endl;
     return;
@@ -98,7 +92,7 @@ void UserBookMapService::addUserBookMap(const std::string &account, const std::s
 
 // 删除记录
 void UserBookMapService::deleteUserBookMap(const std::string &account, const std::string &isbn) {
-  if (checkUserBookMap(account, isbn) == nullptr) {
+  if (findUserBookMap(account, isbn) == nullptr) {
     std::cout << "登记归还失败, 用户(" + account + ") 未借阅书籍(" << isbn
               << ")" << std::endl;
     return;

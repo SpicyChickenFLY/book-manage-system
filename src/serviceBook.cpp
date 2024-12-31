@@ -6,15 +6,12 @@
 
 #include "service.h"
 
-// TODO: 需要把所有的标准输出的功能外移
-// service 只负责将正确的结果数组返回，不负责输出
-
 BookService::BookService(const std::string &fn) : filename(fn) {}
 
 bool BookService::load() {
   std::ifstream file(filename);
   if (!file.is_open()) {
-    std::cerr << "初始化书籍数据库失败，无法打开文件: " << filename << std::endl;
+    std::cerr << "无法打开书籍文件: " << filename << std::endl;
     return false;
   }
 
@@ -25,9 +22,9 @@ bool BookService::load() {
     std::string field;
 
     getline(ss, field, ',');
-    book.setName(field);
-    getline(ss, field, ',');
     book.setISBN(field);
+    getline(ss, field, ',');
+    book.setName(field);
     getline(ss, field, ',');
     book.setAuthor(field);
     getline(ss, field, ',');
@@ -55,7 +52,7 @@ bool BookService::save() {
   }
 
   for (const Book &book : books) {
-    file << book.getName() << "," << book.getISBN() << "," << book.getAuthor()
+    file << book.getISBN() << "," << book.getName() << "," << book.getAuthor()
          << "," << book.getPublish() << "," << book.getPrice() << ","
          << book.getCapacity() << "," << book.getBorrow() << "\n";
   }
@@ -64,74 +61,56 @@ bool BookService::save() {
   return true;
 }
 
-void BookService::printBody(Book &book) {
-  std::cout << "| 书籍名称:" << std::setw(15) << book.getName()
-            << "| ISBN:" << std::setw(15) << book.getISBN()
-            << "| 作者:" << std::setw(10) << book.getAuthor()
-            << "| 出版社:" << std::setw(15) << book.getPublish()
-            << "| 价格:" << std::setw(10) << book.getPrice()
-            << "| 库存:" << std::setw(8) << book.getCapacity()
-            << "| 借阅次数:" << std::setw(8) << book.getBorrow() << std::endl;
-}
-void BookService::printTotal(int total) {
-  std::cout << "共 " << total << " 条记录" << std::endl;
-}
-
-void BookService::listBooks() {
+std::vector<Book> BookService::listBooks() {
+  std::vector<Book> result;
   for (Book &book : books) {
-    printBody(book);
+    result.push_back(book);
   }
-  printTotal(int(books.size()));
+  return result;
 }
 
-void BookService::listBooksForName(const std::string &name) {
-  int count = 0;
+std::vector<Book> BookService::listBooksForName(const std::string &name) {
+  std::vector<Book> result;
   for (Book &book : books) {
-    if (book.getName() != name) {
-      continue;
-    }
-    printBody(book);
-    count++;
-  }
-  printTotal(count);
-}
-
-void BookService::findBookForISBN(const std::string &isbn) {
-  for (Book &book : books) {
-    if (book.getISBN() == isbn) {
-      printBody(book);
-      return;
+    if (book.getName() == name) {
+      result.push_back(book);
     }
   }
-  std::cout << "查询书籍失败, 书籍ISBN/ISSN编号(" << isbn << ")不存在"
-            << std::endl;
+  return result;
 }
 
-void BookService::listBookForAuthor(const std::string &author) {
-  int count = 0;
+std::vector<Book> BookService::listBookForAuthor(const std::string &author) {
+  std::vector<Book> result;
   std::vector<Book> copy(books);
   sort(copy.begin(), copy.end(),
        [](Book a, Book b) { return a.getName().compare(b.getName()) < 0; });
   for (Book &book : copy) {
-    if (book.getAuthor() != author) {
-      continue;
+    if (book.getAuthor() == author) {
+      result.push_back(book);
     }
-    printBody(book);
-    count++;
   }
-  printTotal(count);
+  return result;
 }
 
-void BookService::listBooksByBorrow(int limit) {
+std::vector<Book> BookService::listBooksByBorrow(int limit) {
   std::vector<Book> copy(books);
   sort(copy.begin(), copy.end(),
        [](Book a, Book b) { return a.getBorrow() > b.getBorrow(); });
-  int count = 0;
+
+  std::vector<Book> result;
   for (size_t i = 0; i < std::min(int(copy.size()), limit); ++i) {
-    printBody(copy[i]);
-    count++;
+    result.push_back(copy[i]);
   }
-  printTotal(count);
+  return result;
+}
+
+Book *BookService::findBookForISBN(const std::string &isbn) {
+  for (Book &book : books) {
+    if (book.getISBN() == isbn) {
+      return &book;
+    }
+  }
+  return nullptr;
 }
 
 Book *BookService::checkBook(const std::string &isbn) {

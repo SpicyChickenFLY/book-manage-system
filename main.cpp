@@ -8,17 +8,17 @@
 
 // 主函数，程序入口
 int main() {
-    // 初始化 账户、书籍、借阅关系数据库
+    // 初始化 账户、书籍、借阅关系服务
     UserService *userService = new UserService("./data/user.csv");
     BookService *bookService = new BookService("./data/book.csv");
     UserBookMapService *userBookMapService = new UserBookMapService("./data/book_user_map.csv");
 
     // 运行图书管理系统
-    BookSys *bookSys = new BookSys(userService, bookService, userBookMapService);
-    if (!bookSys->init()) {
+    System *system = new System(userService, bookService, userBookMapService);
+    if (!system->init()) {
         std::cout << "图书管理系统初始化失败" << std::endl;
     }
-    bookSys->run();
+    system->run();
 
     return 0;
 }

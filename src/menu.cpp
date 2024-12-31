@@ -26,15 +26,21 @@ void Menu::showMenu(std::string who) {
     std::cout << i + 1 << ". " << items[i].name << std::endl;
   }
   if (parentMenu) {
-    std::cout << "0. " << parentMenu->getGobackDesc() << std::endl;
+    std::cout << "0. 返回" << parentMenu->getTitle() << std::endl;
   } else {
     std::cout << "0. 退出系统" << std::endl;
   }
-  std::cout << "\n" << "[" << who << "]" << title << ">: ";
+  std::cout << "[" << who << "]" << title << ">: ";
 }
 
 int Menu::handleChoice(int choice) {
+  std::cout << std::endl;
   if (choice == 0) {
+    if (parentMenu == nullptr) {
+      std::cout << "退出系统，再见" << std::endl;
+      exit(0);
+    }
+    std::cout << "返回" << parentMenu->getTitle() << std::endl;
     return 0;
   } else if (choice > 0 && choice <= items.size()) {
     std::cout << items[choice - 1].name << std::endl;

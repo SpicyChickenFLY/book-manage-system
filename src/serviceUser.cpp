@@ -5,18 +5,16 @@
  */
 
 #include "service.h"
-
-// TODO: 需要把所有的标准输出的功能外移
-// service 只负责将正确的结果数组返回，不负责输出
+#include <vector>
 
 UserService::UserService(const std::string &fn) : filename(fn) {} // 构造仅对私有成员赋值
 
-// 数据库从文件加载用户数据
+// 服务从文件加载用户数据
 bool UserService::load() {
   // 使用文件输入流打开文件并准备读取
   std::ifstream file(filename);
   if (!file.is_open()) {
-    std::cerr << "初始化账户数据库失败，无法打开文件: " << filename << std::endl;
+    std::cerr << "无法打开账户文件: " << filename << std::endl;
     return false;
   }
 
@@ -61,30 +59,15 @@ bool UserService::save() {
   return true;
 }
 
-void UserService::listUsers() {
-  std::cout << "|                账户 |    角色 |" << std::endl;
-  std::cout << "|  ================== | ======= |" << std::endl;
+std::vector<User> UserService::listUsers() {
+  std::vector<User> result;
   for (User &user : users) {
-    std::cout << "|" << std::setw(20) << user.getAccount() << " |"
-              << std::setw(8) << user.getRole() << " |" << std::endl;
+    result.push_back(user);
   }
-  std::cout << "共 " << users.size() << " 条记录" << std::endl;
+  return result;
 }
 
-void UserService::findUser(const std::string &account) {
-  for (User &user : users) {
-    if (user.getAccount() == account) {
-      std::cout << "|                账户 |    角色 |" << std::endl;
-      std::cout << "|  ================== | ======= |" << std::endl;
-      std::cout << "|" << std::setw(20) << user.getAccount() << " |"
-                << std::setw(8) << user.getRole() << " |" << std::endl;
-      return;
-    }
-  }
-  std::cout << "查询用户失败, 用户(" + account + ")不存在" << std::endl;
-}
-
-User *UserService::checkUser(const std::string &account) {
+User *UserService::findUser(const std::string &account) {
   for (User &user : users) {
     if (user.getAccount() == account) {
       return &user;
@@ -110,7 +93,7 @@ void UserService::addUser(User *user) {
   std::string account = user->getAccount();
   std::string password = user->getPassword();
   std::string role = user->getRole();
-  if (checkUser(account) != nullptr) {
+  if (findUser(account) != nullptr) {
     std::cout << "创建用户失败, 用户(" + account + ") 已经存在" << std::endl;
     return;
   }
@@ -129,7 +112,7 @@ void UserService::addUser(User *user) {
 
 // 删除记录
 void UserService::deleteUser(const std::string &account) {
-  if (checkUser(account) == nullptr) {
+  if (findUser(account) == nullptr) {
     std::cout << "删除用户失败, 用户(" + account + ")不存在" << std::endl;
     return;
   }

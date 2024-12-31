@@ -27,14 +27,14 @@ private:
   std::string title;           // 菜单标题
   std::vector<MenuItem> items; // 当前菜单的选项
   Menu *parentMenu;            // 指向父菜单的指针
-  std::string gobackDesc;      //
 
 public:
-  Menu(const std::string &title, Menu *parent, std::string gobackDesc)
-      : title(title), parentMenu(parent), gobackDesc(gobackDesc) {}
+  Menu(const std::string &title, Menu *parent)
+      : title(title), parentMenu(parent) {}
   ~Menu() {}
 
-  std::string getGobackDesc() { return gobackDesc; }
+  std::string getTitle() { return title; }
+  Menu* getParentMenu() { return parentMenu; }
 
   void addItem(const std::string &name, int action); // 添加菜单项
   void removeItem(const std::string &name);          // 删除菜单项
