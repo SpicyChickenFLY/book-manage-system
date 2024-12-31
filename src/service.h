@@ -76,12 +76,12 @@ public:
   bool load();
   bool save(); // 保存记录到文件
 
-  UserBookMap *findUserBookMap(const std::string &account,
+  UserBookMap *findBorrow(const std::string &account,
                                 const std::string &isbn);
-  std::vector<UserBookMap> listBooksForUser(const std::string &account);
-  void addUserBookMap(const std::string &account,
+  std::vector<UserBookMap> listBorrowBooksForUser(const std::string &account);
+  void addBorrow(const std::string &account,
                       const std::string &isbn); // 添加记录
-  void deleteUserBookMap(const std::string &account,
+  void deleteBorrow(const std::string &account,
                          const std::string &isbn); // 删除记录
 };
 

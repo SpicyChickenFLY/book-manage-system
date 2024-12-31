@@ -50,7 +50,7 @@ bool BorrowService::save() {
   return true;
 }
 
-std::vector<UserBookMap> BorrowService::listBooksForUser(const std::string &account) {
+std::vector<UserBookMap> BorrowService::listBorrowBooksForUser(const std::string &account) {
   std::vector<UserBookMap> result;
   for (UserBookMap &userBookMap : userBookMaps) {
     if (userBookMap.getAccount() == account) {
@@ -60,7 +60,7 @@ std::vector<UserBookMap> BorrowService::listBooksForUser(const std::string &acco
   return result;
 }
 
-UserBookMap *BorrowService::findUserBookMap(const std::string &account,
+UserBookMap *BorrowService::findBorrow(const std::string &account,
                               const std::string &isbn) {
   for (UserBookMap &userBookMap : userBookMaps) {
     if (userBookMap.getAccount() == account &&
@@ -72,8 +72,8 @@ UserBookMap *BorrowService::findUserBookMap(const std::string &account,
 }
 
 // 添加记录
-void BorrowService::addUserBookMap(const std::string &account, const std::string &isbn) {
-  if (findUserBookMap(account, isbn) != nullptr) {
+void BorrowService::addBorrow(const std::string &account, const std::string &isbn) {
+  if (findBorrow(account, isbn) != nullptr) {
     std::cout << "登记借阅失败, 用户(" + account + ") 已经拥有书籍(" << isbn
               << ")" << std::endl;
     return;
@@ -91,8 +91,8 @@ void BorrowService::addUserBookMap(const std::string &account, const std::string
 }
 
 // 删除记录
-void BorrowService::deleteUserBookMap(const std::string &account, const std::string &isbn) {
-  if (findUserBookMap(account, isbn) == nullptr) {
+void BorrowService::deleteBorrow(const std::string &account, const std::string &isbn) {
+  if (findBorrow(account, isbn) == nullptr) {
     std::cout << "登记归还失败, 用户(" + account + ") 未借阅书籍(" << isbn
               << ")" << std::endl;
     return;

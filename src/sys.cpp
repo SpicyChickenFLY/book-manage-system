@@ -279,14 +279,14 @@ Menu *System::execAction(int action) {
   // 借阅管理
   else if (action == LIST_USER_BOOK) {
     outputUserBookMaps(
-        borrowService->listBooksForUser(currentUser->getAccount()));
+        borrowService->listBorrowBooksForUser(currentUser->getAccount()));
   } else if (action == ADD_USER_BOOK) {
     std::string isbn = inputOneStr("书籍ISBN/ISSN编号");
     bookService->borrowBook(isbn);
-    borrowService->addUserBookMap(currentUser->getAccount(), isbn);
+    borrowService->addBorrow(currentUser->getAccount(), isbn);
   } else if (action == DEL_USER_BOOK) {
     std::string isbn = inputOneStr("书籍ISBN/ISSN编号");
-    borrowService->deleteUserBookMap(currentUser->getAccount(), isbn);
+    borrowService->deleteBorrow(currentUser->getAccount(), isbn);
     bookService->returnBook(isbn);
   }
 
